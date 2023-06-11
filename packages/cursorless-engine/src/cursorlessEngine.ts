@@ -1,13 +1,22 @@
-import { Command, CommandServerApi, Hats, IDE } from "@cursorless/common";
+import {
+  Command,
+  CommandServerApi,
+  Hats,
+  IDE,
+  ScopeType,
+} from "@cursorless/common";
 import { StoredTargetMap, TestCaseRecorder, TreeSitter } from ".";
+import { ScopeVisualizer } from "./ScopeVisualizer";
 import { Debug } from "./core/Debug";
 import { HatTokenMapImpl } from "./core/HatTokenMapImpl";
 import { Snippets } from "./core/Snippets";
+import { ensureCommandShape } from "./core/commandVersionUpgrades/ensureCommandShape";
 import { RangeUpdater } from "./core/updateSelections/RangeUpdater";
 import { LanguageDefinitions } from "./languages/LanguageDefinitions";
-import { injectIde } from "./singletons/ide.singleton";
-import { ensureCommandShape } from "./core/commandVersionUpgrades/ensureCommandShape";
+import { ScopeHandlerFactoryImpl } from "./processTargets/modifiers/scopeHandlers";
 import { runCommand } from "./runCommand";
+import { injectIde } from "./singletons/ide.singleton";
+import { StartStop } from "./StartStop";
 
 export function createCursorlessEngine(
   treeSitter: TreeSitter,
@@ -39,6 +48,14 @@ export function createCursorlessEngine(
 
   const languageDefinitions = new LanguageDefinitions(treeSitter);
 
+  const scopeVisualizer = new StartStop(
+    (scopeType: ScopeType) =>
+      new ScopeVisualizer(
+        new ScopeHandlerFactoryImpl(languageDefinitions),
+        scopeType,
+      ),
+  );
+
   return {
     commandApi: {
       runCommand(command: Command) {
@@ -67,6 +84,7 @@ export function createCursorlessEngine(
         );
       },
     },
+    scopeVisualizer,
     testCaseRecorder,
     storedTargets,
     hatTokenMap,
@@ -91,6 +109,7 @@ export interface CommandApi {
 
 export interface CursorlessEngine {
   commandApi: CommandApi;
+  scopeVisualizer: StartStop<[ScopeType]>;
   testCaseRecorder: TestCaseRecorder;
   storedTargets: StoredTargetMap;
   hatTokenMap: HatTokenMapImpl;

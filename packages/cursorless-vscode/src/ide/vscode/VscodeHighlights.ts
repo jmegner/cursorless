@@ -1,13 +1,8 @@
-import * as vscode from "vscode";
+import { FlashStyle, GeneralizedRange } from "@cursorless/common";
 import { ExtensionContext } from "vscode";
-import { FlashStyle, partition } from "@cursorless/common";
-import {
-  CharacterRange,
-  GeneralizedRange,
-  isLineRange,
-  LineRange,
-} from "@cursorless/common";
-import { VscodeHighlightDecorationTypes } from "./VscodeHighlightDecorationTypes";
+import { VscodeBackgroundHighlight } from "./VscodeBackgroundHighlight";
+import { VscodeDecorationStyle } from "./VscodeDecorationStyle";
+import { VscodeOutlineHighlight } from "./VscodeOutlineHighlight";
 import { VscodeTextEditorImpl } from "./VscodeTextEditorImpl";
 
 export enum HighlightStyle {
@@ -17,13 +12,18 @@ export enum HighlightStyle {
    * Used for calibrating timing when recording a video
    */
   timingCalibration = "timingCalibration",
+  scopeContent = "scopeContent",
 }
 
 export type VscodeStyle = FlashStyle | HighlightStyle;
 
-const allStyles = Object.values<VscodeStyle>(FlashStyle).concat(
-  Object.values(HighlightStyle),
-);
+const backgroundStyles: VscodeStyle[] = [
+  HighlightStyle.highlight0,
+  HighlightStyle.highlight1,
+  HighlightStyle.timingCalibration,
+].concat(Object.values(HighlightStyle));
+
+const outlineStyles = [HighlightStyle.scopeContent];
 
 /**
  * Manages highlights for VSCode.  This class is also used by
@@ -31,18 +31,23 @@ const allStyles = Object.values<VscodeStyle>(FlashStyle).concat(
  * class doesn't handle the timing of the flashes.
  */
 export default class VscodeHighlights {
-  private highlightDecorations: Record<
-    VscodeStyle,
-    VscodeHighlightDecorationTypes
-  >;
+  private highlightDecorations: Record<VscodeStyle, VscodeDecorationStyle>;
 
   constructor(extensionContext: ExtensionContext) {
-    this.highlightDecorations = Object.fromEntries(
-      allStyles.map((style) => [
-        style,
-        new VscodeHighlightDecorationTypes(style),
-      ]),
-    ) as Record<VscodeStyle, VscodeHighlightDecorationTypes>;
+    this.highlightDecorations = {
+      ...Object.fromEntries(
+        backgroundStyles.map((style) => [
+          style,
+          new VscodeBackgroundHighlight(style),
+        ]),
+      ),
+      ...Object.fromEntries(
+        outlineStyles.map((style) => [
+          style,
+          new VscodeOutlineHighlight(style),
+        ]),
+      ),
+    } as Record<VscodeStyle, VscodeBackgroundHighlight>;
 
     extensionContext.subscriptions.push(
       ...Object.values(this.highlightDecorations),
@@ -54,30 +59,6 @@ export default class VscodeHighlights {
     editor: VscodeTextEditorImpl,
     ranges: GeneralizedRange[],
   ) {
-    const [lineRanges, tokenRanges] = partition<LineRange, CharacterRange>(
-      ranges,
-      isLineRange,
-    );
-
-    const { tokenDecorationType, lineDecorationType } =
-      this.highlightDecorations[style];
-
-    editor.vscodeEditor.setDecorations(
-      tokenDecorationType,
-      tokenRanges.map(
-        ({ start, end }) =>
-          new vscode.Range(
-            start.line,
-            start.character,
-            end.line,
-            end.character,
-          ),
-      ),
-    );
-
-    editor.vscodeEditor.setDecorations(
-      lineDecorationType,
-      lineRanges.map((range) => new vscode.Range(range.start, 0, range.end, 0)),
-    );
+    this.highlightDecorations[style].setRanges(editor, ranges);
   }
 }

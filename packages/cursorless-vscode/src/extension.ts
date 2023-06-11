@@ -63,6 +63,7 @@ export async function activate(
     testCaseRecorder,
     storedTargets,
     hatTokenMap,
+    scopeVisualizer,
     snippets,
     injectIde,
   } = createCursorlessEngine(
@@ -80,6 +81,7 @@ export async function activate(
     vscodeIDE,
     commandApi,
     testCaseRecorder,
+    scopeVisualizer,
     keyboardCommands,
     hats,
   );
