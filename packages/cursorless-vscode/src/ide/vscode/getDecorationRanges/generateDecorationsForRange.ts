@@ -1,6 +1,6 @@
 import { Range, TextEditor } from "@cursorless/common";
 import { range } from "lodash";
-import { DecoratedRange } from "./getDecorationRanges.types";
+import { Borders, DecoratedRange } from "./getDecorationRanges.types";
 
 export function* generateDecorationsForRange(
   editor: TextEditor,
@@ -9,12 +9,7 @@ export function* generateDecorationsForRange(
   if (tokenRange.isSingleLine) {
     yield {
       range: tokenRange,
-      style: {
-        top: true,
-        bottom: true,
-        left: true,
-        right: true,
-      },
+      style: FULL,
     };
     return;
   }
@@ -23,9 +18,11 @@ export function* generateDecorationsForRange(
   const lineRanges = range(tokenRange.start.line, tokenRange.end.line + 1).map(
     (lineNumber) => document.lineAt(lineNumber).range,
   );
-  lineRanges[0] = lineRanges[0].intersection(tokenRange)!;
-  lineRanges[lineRanges.length - 1] =
-    lineRanges[lineRanges.length - 1].intersection(tokenRange)!;
+  lineRanges[0] = lineRanges[0].with(tokenRange.start);
+  lineRanges[lineRanges.length - 1] = lineRanges[lineRanges.length - 1].with(
+    undefined,
+    tokenRange.end,
+  );
 
   const lineCount = lineRanges.length;
 
@@ -42,96 +39,106 @@ export function* generateDecorationsForRange(
   }
 }
 
-function* handleTwoLines(lineRanges: Range[]) {
+function* handleTwoLines(lineRanges: Range[]): Iterable<DecoratedRange> {
   const [firstLine, secondLine] = lineRanges;
   const {
-    start: { character: firstLineStart },
+    start: { character: firstLineStart, line: firstLineNumber },
     end: { character: firstLineEnd },
   } = firstLine;
   const {
-    start: { character: secondLineStart },
+    start: { character: secondLineStart, line: secondLineNumber },
     end: { character: secondLineEnd },
   } = secondLine;
 
   if (firstLineStart >= secondLineEnd) {
     yield {
       range: firstLine,
-      style: {
-        top: true,
-        bottom: true,
-        left: true,
-        right: false,
-      },
+      style: TOP_BOTTOM_LEFT,
     };
 
     yield {
       range: secondLine,
-      style: {
-        top: true,
-        bottom: true,
-        left: false,
-        right: true,
-      },
+      style: TOP_BOTTOM_RIGHT,
     };
 
     return;
   }
 
   yield {
-    range:
-      firstLineEnd <= secondLineEnd
-        ? firstLine
-        : firstLine.with(undefined, secondLine.end.with(firstLine.start.line)),
-    style: {
-      top: true,
-      bottom: false,
-      left: true,
-      right: false,
-    },
+    range: singleLineRange(
+      firstLineNumber,
+      firstLineStart,
+      Math.min(firstLineEnd, secondLineEnd),
+    ),
+    style: TOP_LEFT,
   };
 
   if (firstLineEnd > secondLineEnd) {
     yield {
-      range: firstLine.with(secondLine.end.with(firstLine.start.line)),
-      style: {
-        top: true,
-        bottom: true,
-        left: false,
-        right: false,
-      },
+      range: singleLineRange(firstLineNumber, secondLineEnd, firstLineEnd),
+      style: TOP_BOTTOM,
     };
   }
 
   if (secondLineStart < firstLineStart) {
     yield {
-      range: secondLine.with(
-        undefined,
-        firstLine.start.with(secondLine.start.line),
-      ),
-      style: {
-        top: true,
-        bottom: true,
-        left: false,
-        right: secondLineEnd <= firstLineStart,
-      },
+      range: singleLineRange(secondLineNumber, secondLineStart, firstLineStart),
+      style: TOP_BOTTOM,
     };
   }
 
-  if (secondLineEnd > firstLineStart) {
-    yield {
-      range:
-        secondLineStart >= firstLineStart
-          ? secondLine
-          : secondLine.with(
-              firstLine.start.with(secondLine.start.line),
-              undefined,
-            ),
-      style: {
-        top: false,
-        bottom: true,
-        left: false,
-        right: true,
-      },
-    };
-  }
+  yield {
+    range: singleLineRange(
+      secondLineNumber,
+      Math.max(firstLineStart, secondLineStart),
+      secondLineEnd,
+    ),
+    style: BOTTOM_RIGHT,
+  };
+}
+
+const TOP_LEFT: Borders = {
+  top: true,
+  left: true,
+  right: false,
+  bottom: false,
+};
+
+const TOP_BOTTOM: Borders = {
+  top: true,
+  bottom: true,
+  left: false,
+  right: false,
+};
+
+const BOTTOM_RIGHT: Borders = {
+  bottom: true,
+  right: true,
+  top: false,
+  left: false,
+};
+
+const TOP_BOTTOM_LEFT: Borders = {
+  top: true,
+  bottom: true,
+  left: true,
+  right: false,
+};
+
+const TOP_BOTTOM_RIGHT: Borders = {
+  top: true,
+  bottom: true,
+  right: true,
+  left: false,
+};
+
+const FULL: Borders = {
+  top: true,
+  right: true,
+  bottom: true,
+  left: true,
+};
+
+function singleLineRange(line: number, start: number, end: number): Range {
+  return new Range(line, start, line, end);
 }
