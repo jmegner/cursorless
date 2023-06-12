@@ -245,20 +245,20 @@
       },
       {
         "id": "cursorless.scopeContentBackground",
-        "description": "Background color to use for calibrating timing when recording a video",
+        "description": "Background color to use for visualizing scopes",
         "defaults": {
-          "dark": "#230026",
-          "light": "#230026",
-          "highContrast": "#230026"
+          "dark": "#ea00ff57",
+          "light": "#ea00ff57",
+          "highContrast": "#ea00ff57"
         }
       },
       {
         "id": "cursorless.scopeContentBorder",
-        "description": "Border color to use for calibrating timing when recording a video",
+        "description": "Border color to use for visualizing scopes",
         "defaults": {
-          "dark": "#230026",
-          "light": "#230026",
-          "highContrast": "#230026"
+          "dark": "#ebdeec84",
+          "light": "#ebdeec84",
+          "highContrast": "#ebdeec84"
         }
       }
     ],
