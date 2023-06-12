@@ -888,6 +888,7 @@
     "@cursorless/common": "workspace:*",
     "@cursorless/cursorless-engine": "workspace:*",
     "@cursorless/vscode-common": "workspace:*",
+    "itertools": "^1.7.1",
     "lodash": "^4.17.21",
     "semver": "^7.3.9",
     "uuid": "^9.0.0",

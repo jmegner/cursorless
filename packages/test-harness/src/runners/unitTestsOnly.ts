@@ -5,7 +5,11 @@ import { getCursorlessRepoRoot } from "@cursorless/common";
 import * as path from "path";
 import { runAllTestsInDirs } from "../util/runAllTestsInDir";
 
-const testDirectories = ["cursorless-engine", "common"];
+const testDirectories = [
+  "cursorless-engine",
+  "common",
+  "cursorless-vscode/out/ide/vscode/getDecorationRanges",
+];
 
 export function run(): Promise<void> {
   return runAllTestsInDirs(
