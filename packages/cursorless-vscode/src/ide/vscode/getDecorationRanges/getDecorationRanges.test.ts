@@ -1,6 +1,6 @@
 import assert = require("assert");
 import { getDecorationRanges } from "./getDecorationRanges";
-import { Borders, StyleParameters } from "./getDecorationRanges.types";
+import { DecorationStyle, StyleParameters } from "./getDecorationRanges.types";
 import {
   Range,
   RangePlainObject,
@@ -14,7 +14,7 @@ interface RangeDescription {
 }
 
 export interface ExpectedResult {
-  styleParameters: StyleParameters<Borders>;
+  styleParameters: StyleParameters<DecorationStyle>;
   ranges: RangePlainObject[];
 }
 

@@ -1,7 +1,7 @@
 import { Range } from "@cursorless/common";
 import {
   BorderStyle,
-  Borders,
+  DecorationStyle,
   DecoratedRange,
 } from "./getDecorationRanges.types";
 import { flatmap } from "itertools";
@@ -111,7 +111,7 @@ function* handleLine({
     return a.offset - b.offset;
   });
 
-  const currentDecoration: Borders = {
+  const currentDecoration: DecorationStyle = {
     top:
       previousLine == null || previousLine.isFirst
         ? BorderStyle.solid

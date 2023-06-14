@@ -22,7 +22,7 @@ import { getDecorationRanges } from "./getDecorationRanges";
 import { toVscodeRange } from "@cursorless/vscode-common";
 import {
   BorderStyle,
-  Borders,
+  DecorationStyle,
   StyleParameters,
   StyleParametersRanges,
 } from "./getDecorationRanges/getDecorationRanges.types";
@@ -78,7 +78,7 @@ export class VscodeOutlineHighlight implements VscodeDecorationStyle {
 
 class Decorator {
   private decorationTypes: CompositeKeyDefaultMap<
-    StyleParameters<Borders>,
+    StyleParameters<DecorationStyle>,
     TextEditorDecorationType
   >;
 
@@ -97,7 +97,7 @@ class Decorator {
 
   setDecorations(
     editor: VscodeTextEditorImpl,
-    decoratedRanges: StyleParametersRanges<Borders>[],
+    decoratedRanges: StyleParametersRanges<DecorationStyle>[],
   ) {
     const untouchedDecorationTypes = new Set(this.decorationTypes.values());
 
@@ -126,7 +126,7 @@ class Decorator {
 
 function getDecorationStyle(
   style: VscodeStyle,
-  borders: Borders,
+  borders: DecorationStyle,
 ): vscode.TextEditorDecorationType {
   const options: DecorationRenderOptions = {
     backgroundColor: new ThemeColor(`cursorless.${style}Background`),
@@ -135,12 +135,13 @@ function getDecorationStyle(
     borderWidth: "1px",
     borderRadius: getBorderRadius(borders),
     rangeBehavior: DecorationRangeBehavior.ClosedClosed,
+    isWholeLine: borders.isWholeLine,
   };
 
   return window.createTextEditorDecorationType(options);
 }
 
-function getBorderStyle(style: VscodeStyle, borders: Borders): string {
+function getBorderStyle(style: VscodeStyle, borders: DecorationStyle): string {
   return [
     getSingleBorderStyle(style, borders.top),
     getSingleBorderStyle(style, borders.right),
@@ -157,7 +158,7 @@ function getSingleBorderStyle(style: VscodeStyle, borderStyle: BorderStyle) {
   return style === HighlightStyle.scopeContent ? "none" : "solid";
 }
 
-function getBorderColor(borders: Borders): string {
+function getBorderColor(borders: DecorationStyle): string {
   return [
     borders.top === BorderStyle.solid ? solidColor : porousColor,
     borders.right === BorderStyle.solid ? solidColor : porousColor,
@@ -169,7 +170,7 @@ function getBorderColor(borders: Borders): string {
 const porousColor = "rgba(235, 222, 236, 0.23)";
 const solidColor = "#ebdeec84";
 
-function getBorderRadius(borders: Borders): string {
+function getBorderRadius(borders: DecorationStyle): string {
   return [
     borders.top === BorderStyle.solid && borders.left === BorderStyle.solid
       ? "2px"

@@ -6,11 +6,12 @@ export enum BorderStyle {
   none = "none",
 }
 
-export interface Borders {
+export interface DecorationStyle {
   top: BorderStyle;
   bottom: BorderStyle;
   left: BorderStyle;
   right: BorderStyle;
+  isWholeLine?: boolean;
 }
 
 export interface StyledRange<T> {
@@ -18,7 +19,7 @@ export interface StyledRange<T> {
   style: T;
 }
 
-export type DecoratedRange = StyledRange<Borders>;
+export type DecoratedRange = StyledRange<DecorationStyle>;
 
 export interface StyleParameters<T> {
   style: T;

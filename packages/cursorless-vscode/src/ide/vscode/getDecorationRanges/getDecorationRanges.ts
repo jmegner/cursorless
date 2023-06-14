@@ -1,13 +1,16 @@
 import { Range, TextEditor } from "@cursorless/common";
 import { flatmap } from "itertools";
-import { Borders, StyleParametersRanges } from "./getDecorationRanges.types";
+import {
+  DecorationStyle,
+  StyleParametersRanges,
+} from "./getDecorationRanges.types";
 import { getDifferentiatedRanges } from "./getDifferentiatedRanges";
 import { generateDecorationsForRange } from "./generateDecorationsForRange";
 
 export function getDecorationRanges(
   editor: TextEditor,
   ranges: Range[],
-): StyleParametersRanges<Borders>[] {
+): StyleParametersRanges<DecorationStyle>[] {
   const decoratedRanges = Array.from(
     flatmap(ranges, (range) => generateDecorationsForRange(editor, range)),
   );
@@ -15,6 +18,12 @@ export function getDecorationRanges(
   return getDifferentiatedRanges(decoratedRanges, getBorderKey);
 }
 
-function getBorderKey({ top, right, left, bottom }: Borders) {
-  return [top, right, left, bottom];
+function getBorderKey({
+  top,
+  right,
+  left,
+  bottom,
+  isWholeLine,
+}: DecorationStyle) {
+  return [top, right, left, bottom, isWholeLine ?? false];
 }
