@@ -129,7 +129,7 @@ function getDecorationStyle(
 ): vscode.TextEditorDecorationType {
   const options: DecorationRenderOptions = {
     backgroundColor: new ThemeColor(`cursorless.${style}Background`),
-    borderColor: getBorderColor(borders),
+    borderColor: getBorderColor(style, borders),
     borderStyle: getBorderStyle(style, borders),
     borderWidth: "1px",
     borderRadius: getBorderRadius(borders),
@@ -157,7 +157,16 @@ function getSingleBorderStyle(style: VscodeStyle, borderStyle: BorderStyle) {
   return style === HighlightStyle.scopeContent ? "none" : "solid";
 }
 
-function getBorderColor(borders: DecorationStyle): string {
+function getBorderColor(style: VscodeStyle, borders: DecorationStyle): string {
+  const solidColor =
+    style === HighlightStyle.scopeRemoval
+      ? "rgba(255, 0, 0, 0.47)"
+      : "#ebdeec84";
+  const porousColor =
+    style === HighlightStyle.scopeRemoval
+      ? "rgba(255, 0, 0, 0.29)"
+      : "rgba(235, 222, 236, 0.23)";
+
   return [
     borders.top === BorderStyle.solid ? solidColor : porousColor,
     borders.right === BorderStyle.solid ? solidColor : porousColor,
@@ -165,9 +174,6 @@ function getBorderColor(borders: DecorationStyle): string {
     borders.left === BorderStyle.solid ? solidColor : porousColor,
   ].join(" ");
 }
-
-const porousColor = "rgba(235, 222, 236, 0.23)";
-const solidColor = "#ebdeec84";
 
 function getBorderRadius(borders: DecorationStyle): string {
   return [

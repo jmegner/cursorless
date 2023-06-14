@@ -64,6 +64,11 @@ export class ScopeVisualizer implements Disposable {
           break;
         case VisualizationType.removal:
           ide().setHighlightRanges(
+            "scopeDomain",
+            editor,
+            scopes.map(({ domain }) => toCharacterRange(domain)),
+          );
+          ide().setHighlightRanges(
             "scopeRemoval",
             editor,
             targets.map((target) =>
@@ -93,6 +98,7 @@ export class ScopeVisualizer implements Disposable {
           ide().setHighlightRanges("scopeContent", editor, []);
           break;
         case VisualizationType.removal:
+          ide().setHighlightRanges("scopeDomain", editor, []);
           ide().setHighlightRanges("scopeRemoval", editor, []);
           break;
       }
