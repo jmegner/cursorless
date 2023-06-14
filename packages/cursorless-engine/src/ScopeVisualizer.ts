@@ -17,6 +17,11 @@ interface VisualizationInfo {
 export class ScopeVisualizer implements Disposable {
   setScopeType(visualizationInfo: VisualizationInfo | undefined) {
     this.visualizationInfo = visualizationInfo;
+    // Clear highlights becasue VSCode seems to behave strangely when
+    // changing the highlight type while highlights are active.  Would probably
+    // be better to have this happen in VSCode-specific impl, but that's tricky
+    // because the VSCode impl doesn't know about the visualization type.
+    this.clearHighlights();
     this.debouncer.run();
   }
 
@@ -40,17 +45,24 @@ export class ScopeVisualizer implements Disposable {
     this.debouncer.run();
   }
 
+  private clearHighlights() {
+    ide().visibleTextEditors.forEach((editor) => {
+      ide().setHighlightRanges("scopeDomain", editor, []);
+      ide().setHighlightRanges("scopeContent", editor, []);
+      ide().setHighlightRanges("scopeRemoval", editor, []);
+    });
+  }
+
   private highlightScopes() {
+    if (this.visualizationInfo == null) {
+      this.clearHighlights();
+      return;
+    }
+
     ide().visibleTextEditors.forEach((editor) => {
       const { document } = editor;
-      if (this.visualizationInfo === undefined) {
-        ide().setHighlightRanges("scopeDomain", editor, []);
-        ide().setHighlightRanges("scopeContent", editor, []);
-        ide().setHighlightRanges("scopeRemoval", editor, []);
-        return;
-      }
 
-      const { scopeType, visualizationType } = this.visualizationInfo;
+      const { scopeType, visualizationType } = this.visualizationInfo!;
       const scopeHandler = this.scopeHandlerFactory.create(
         scopeType,
         document.languageId,
@@ -104,10 +116,6 @@ export class ScopeVisualizer implements Disposable {
       }
     });
 
-    ide().visibleTextEditors.forEach((editor) => {
-      ide().setHighlightRanges("scopeDomain", editor, []);
-      ide().setHighlightRanges("scopeContent", editor, []);
-      ide().setHighlightRanges("scopeRemoval", editor, []);
-    });
+    this.clearHighlights();
   }
 }
