@@ -1,12 +1,11 @@
 import {
   CURSORLESS_COMMAND_ID,
   CursorlessCommandId,
-  ScopeType,
   isTesting,
 } from "@cursorless/common";
 import {
   CommandApi,
-  StartStop,
+  ScopeVisualizer,
   TestCaseRecorder,
   showCheatsheet,
   updateDefaults,
@@ -22,7 +21,7 @@ export function registerCommands(
   vscodeIde: VscodeIDE,
   commandApi: CommandApi,
   testCaseRecorder: TestCaseRecorder,
-  scopeVisualizer: StartStop<[ScopeType, string]>,
+  scopeVisualizer: ScopeVisualizer,
   keyboardCommands: KeyboardCommands,
   hats: VscodeHats,
 ): void {

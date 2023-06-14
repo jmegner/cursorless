@@ -1,5 +1,4 @@
-
 export enum VisualizationType {
-  standard = "standard",
-  removal = "removal"
+  content = "content",
+  removal = "removal",
 }

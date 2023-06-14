@@ -5,4 +5,3 @@ export * from "./testCaseRecorder/TestCaseRecorder";
 export * from "./core/StoredTargets";
 export * from "./typings/TreeSitter";
 export * from "./cursorlessEngine";
-export * from "./StartStop";

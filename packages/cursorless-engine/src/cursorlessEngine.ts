@@ -6,7 +6,7 @@ import {
   ScopeType,
 } from "@cursorless/common";
 import { StoredTargetMap, TestCaseRecorder, TreeSitter } from ".";
-import { ScopeVisualizer } from "./ScopeVisualizer";
+import { ScopeVisualizer as ScopeVisualizerImpl } from "./ScopeVisualizer";
 import { Debug } from "./core/Debug";
 import { HatTokenMapImpl } from "./core/HatTokenMapImpl";
 import { Snippets } from "./core/Snippets";
@@ -16,8 +16,6 @@ import { LanguageDefinitions } from "./languages/LanguageDefinitions";
 import { ScopeHandlerFactoryImpl } from "./processTargets/modifiers/scopeHandlers";
 import { runCommand } from "./runCommand";
 import { injectIde } from "./singletons/ide.singleton";
-import { StartStop } from "./StartStop";
-import { VisualizationType } from "./VisualizationType";
 
 export function createCursorlessEngine(
   treeSitter: TreeSitter,
@@ -49,13 +47,8 @@ export function createCursorlessEngine(
 
   const languageDefinitions = new LanguageDefinitions(treeSitter);
 
-  const scopeVisualizer = new StartStop(
-    (scopeType: ScopeType, visualizationType: string) =>
-      new ScopeVisualizer(
-        new ScopeHandlerFactoryImpl(languageDefinitions),
-        scopeType,
-        VisualizationType[visualizationType as keyof typeof VisualizationType],
-      ),
+  const scopeVisualizer = new ScopeVisualizerImpl(
+    new ScopeHandlerFactoryImpl(languageDefinitions),
   );
 
   return {
@@ -86,7 +79,14 @@ export function createCursorlessEngine(
         );
       },
     },
-    scopeVisualizer,
+    scopeVisualizer: {
+      start(scopeType: ScopeType, visualizationType: string) {
+        scopeVisualizer.setScopeType(scopeType, visualizationType);
+      },
+      stop() {
+        scopeVisualizer.setScopeType(undefined, undefined);
+      },
+    },
     testCaseRecorder,
     storedTargets,
     hatTokenMap,
@@ -109,9 +109,14 @@ export interface CommandApi {
   runCommandSafe(...args: unknown[]): Promise<unknown>;
 }
 
+export interface ScopeVisualizer {
+  start(scopeType: ScopeType, visualizationType: string): void;
+  stop(): void;
+}
+
 export interface CursorlessEngine {
   commandApi: CommandApi;
-  scopeVisualizer: StartStop<[ScopeType, string]>;
+  scopeVisualizer: ScopeVisualizer;
   testCaseRecorder: TestCaseRecorder;
   storedTargets: StoredTargetMap;
   hatTokenMap: HatTokenMapImpl;
