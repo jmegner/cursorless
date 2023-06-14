@@ -21,6 +21,7 @@ import { VscodeTextEditorImpl } from "./VscodeTextEditorImpl";
 import { getDecorationRanges } from "./getDecorationRanges";
 import { toVscodeRange } from "@cursorless/vscode-common";
 import {
+  BorderStyle,
   Borders,
   StyleParameters,
   StyleParametersRanges,
@@ -129,7 +130,7 @@ function getDecorationStyle(
 ): vscode.TextEditorDecorationType {
   const options: DecorationRenderOptions = {
     backgroundColor: new ThemeColor(`cursorless.${style}Background`),
-    borderColor: new ThemeColor(`cursorless.${style}Border`),
+    borderColor: getBorderColor(borders),
     borderStyle: getBorderStyle(borders),
     borderWidth: "1px",
     borderRadius: getBorderRadius(borders),
@@ -140,19 +141,34 @@ function getDecorationStyle(
 }
 
 function getBorderStyle(borders: Borders): string {
+  return [borders.top, borders.right, borders.bottom, borders.left].join(" ");
+}
+
+function getBorderColor(borders: Borders): string {
   return [
-    borders.top ? "solid" : "none",
-    borders.right ? "solid" : "none",
-    borders.bottom ? "solid" : "none",
-    borders.left ? "solid" : "none",
+    borders.top === BorderStyle.solid ? solidColor : porousColor,
+    borders.right === BorderStyle.solid ? solidColor : porousColor,
+    borders.bottom === BorderStyle.solid ? solidColor : porousColor,
+    borders.left === BorderStyle.solid ? solidColor : porousColor,
   ].join(" ");
 }
 
+const porousColor = "rgba(235, 222, 236, 0.23)";
+const solidColor = "#ebdeec84";
+
 function getBorderRadius(borders: Borders): string {
   return [
-    borders.top && borders.left ? "2px" : "0px",
-    borders.top && borders.right ? "2px" : "0px",
-    borders.bottom && borders.right ? "2px" : "0px",
-    borders.bottom && borders.left ? "2px" : "0px",
+    borders.top === BorderStyle.solid && borders.left === BorderStyle.solid
+      ? "2px"
+      : "0px",
+    borders.top === BorderStyle.solid && borders.right === BorderStyle.solid
+      ? "2px"
+      : "0px",
+    borders.bottom === BorderStyle.solid && borders.right === BorderStyle.solid
+      ? "2px"
+      : "0px",
+    borders.bottom === BorderStyle.solid && borders.left === BorderStyle.solid
+      ? "2px"
+      : "0px",
   ].join(" ");
 }

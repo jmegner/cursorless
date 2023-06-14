@@ -1,10 +1,7 @@
 import { Range, TextEditor } from "@cursorless/common";
 import { range } from "lodash";
-import { DecoratedRange } from "./getDecorationRanges.types";
-import { FULL } from "./borderStyles";
-import { handleTwoLines } from "./handleTwoLines";
-import { handleThreeLines } from "./handleThreeLines";
-import { handleManyLines } from "./handleManyLines";
+import { BorderStyle, DecoratedRange } from "./getDecorationRanges.types";
+import { handleMultipleLines } from "./handleMultipleLines";
 
 export function* generateDecorationsForRange(
   editor: TextEditor,
@@ -13,13 +10,17 @@ export function* generateDecorationsForRange(
   if (tokenRange.isSingleLine) {
     yield {
       range: tokenRange,
-      style: FULL,
+      style: {
+        top: BorderStyle.solid,
+        right: BorderStyle.solid,
+        bottom: BorderStyle.solid,
+        left: BorderStyle.solid,
+      },
     };
     return;
   }
 
   const { document } = editor;
-  // TODO: We don't actually need anything other than first and last two lines
   const lineRanges = range(tokenRange.start.line, tokenRange.end.line + 1).map(
     (lineNumber) => document.lineAt(lineNumber).range,
   );
@@ -29,17 +30,5 @@ export function* generateDecorationsForRange(
     tokenRange.end,
   );
 
-  const lineCount = lineRanges.length;
-
-  switch (lineCount) {
-    case 2:
-      yield* handleTwoLines(lineRanges);
-      break;
-    case 3:
-      yield* handleThreeLines(lineRanges);
-      break;
-    default:
-      yield* handleManyLines(lineRanges);
-      break;
-  }
+  yield* handleMultipleLines(lineRanges);
 }

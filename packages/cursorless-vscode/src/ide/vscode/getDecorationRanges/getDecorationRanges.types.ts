@@ -1,10 +1,16 @@
 import { Range } from "@cursorless/common";
 
+export enum BorderStyle {
+  porous = "dashed",
+  solid = "solid",
+  none = "none",
+}
+
 export interface Borders {
-  top: boolean;
-  bottom: boolean;
-  left: boolean;
-  right: boolean;
+  top: BorderStyle;
+  bottom: BorderStyle;
+  left: BorderStyle;
+  right: BorderStyle;
 }
 
 export interface StyledRange<T> {
