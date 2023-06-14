@@ -1,4 +1,9 @@
-import { Disposable, ScopeType, toCharacterRange } from "@cursorless/common";
+import {
+  Disposable,
+  ScopeType,
+  toCharacterRange,
+  toLineRange,
+} from "@cursorless/common";
 import { Debouncer } from "./core/Debouncer";
 import { ScopeHandlerFactory } from "./processTargets/modifiers/scopeHandlers/ScopeHandlerFactory";
 import { ide } from "./singletons/ide.singleton";
@@ -61,7 +66,11 @@ export class ScopeVisualizer implements Disposable {
           ide().setHighlightRanges(
             "scopeRemoval",
             editor,
-            targets.map((target) => toCharacterRange(target.getRemovalRange())),
+            targets.map((target) =>
+              target.isLine
+                ? toLineRange(target.getRemovalHighlightRange())
+                : toCharacterRange(target.getRemovalHighlightRange()),
+            ),
           );
           break;
       }

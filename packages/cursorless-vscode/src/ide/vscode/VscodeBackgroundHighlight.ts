@@ -38,14 +38,14 @@ export class VscodeBackgroundHighlight implements VscodeDecorationStyle {
   }
 
   setRanges(editor: VscodeTextEditorImpl, ranges: GeneralizedRange[]) {
-    const [lineRanges, tokenRanges] = partition<LineRange, CharacterRange>(
+    const [lineRanges, characterRanges] = partition<LineRange, CharacterRange>(
       ranges,
       isLineRange,
     );
 
     editor.vscodeEditor.setDecorations(
       this.tokenDecorationType,
-      tokenRanges.map(
+      characterRanges.map(
         ({ start, end }) =>
           new vscode.Range(
             start.line,

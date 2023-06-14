@@ -7,6 +7,8 @@ import {
   isLineRange,
   partition,
 } from "@cursorless/common";
+import { toVscodeRange } from "@cursorless/vscode-common";
+import { chain, flatmap } from "itertools";
 import * as vscode from "vscode";
 import {
   DecorationRangeBehavior,
@@ -18,62 +20,62 @@ import {
 import { VscodeDecorationStyle } from "./VscodeDecorationStyle";
 import { HighlightStyle, VscodeStyle } from "./VscodeHighlights";
 import { VscodeTextEditorImpl } from "./VscodeTextEditorImpl";
-import { getDecorationRanges } from "./getDecorationRanges";
-import { toVscodeRange } from "@cursorless/vscode-common";
+import { generateDecorationsForCharacterRange } from "./getDecorationRanges/generateDecorationsForCharacterRange";
+import { generateDecorationsForLineRange } from "./getDecorationRanges/generateDecorationsForLineRange";
 import {
   BorderStyle,
   DecorationStyle,
   StyleParameters,
   StyleParametersRanges,
 } from "./getDecorationRanges/getDecorationRanges.types";
+import { getDifferentiatedRanges } from "./getDecorationRanges/getDifferentiatedRanges";
 
 /**
  * Manages VSCode decoration types for a highlight or flash style.
  */
 export class VscodeOutlineHighlight implements VscodeDecorationStyle {
-  private lineDecorationType: TextEditorDecorationType;
   private decorator: Decorator;
 
   constructor(style: VscodeStyle) {
-    const options: DecorationRenderOptions = {
-      backgroundColor: new ThemeColor(`cursorless.${style}Background`),
-      borderColor: new ThemeColor(`cursorless.${style}Border`),
-      borderStyle: "solid",
-      borderWidth: "1px",
-      borderRadius: "2px",
-      rangeBehavior: DecorationRangeBehavior.ClosedClosed,
-    };
     this.decorator = new Decorator(style);
-
-    this.lineDecorationType = window.createTextEditorDecorationType({
-      ...options,
-      isWholeLine: true,
-    });
   }
 
   setRanges(editor: VscodeTextEditorImpl, ranges: GeneralizedRange[]) {
-    const [lineRanges, tokenRanges] = partition<LineRange, CharacterRange>(
+    const [lineRanges, characterRanges] = partition<LineRange, CharacterRange>(
       ranges,
       isLineRange,
     );
 
-    const decorationRanges = getDecorationRanges(
-      editor,
-      tokenRanges.map(({ start, end }) => new Range(start, end)),
+    const decoratedRanges = Array.from(
+      chain(
+        flatmap(characterRanges, ({ start, end }) =>
+          generateDecorationsForCharacterRange(editor, new Range(start, end)),
+        ),
+        flatmap(lineRanges, ({ start, end }) =>
+          generateDecorationsForLineRange(start, end),
+        ),
+      ),
     );
 
-    this.decorator.setDecorations(editor, decorationRanges);
-
-    editor.vscodeEditor.setDecorations(
-      this.lineDecorationType,
-      lineRanges.map((range) => new vscode.Range(range.start, 0, range.end, 0)),
+    this.decorator.setDecorations(
+      editor,
+      getDifferentiatedRanges(decoratedRanges, getBorderKey),
     );
   }
 
   dispose() {
     this.decorator.dispose();
-    this.lineDecorationType.dispose();
   }
+}
+
+function getBorderKey({
+  top,
+  right,
+  left,
+  bottom,
+  isWholeLine,
+}: DecorationStyle) {
+  return [top, right, left, bottom, isWholeLine ?? false];
 }
 
 class Decorator {

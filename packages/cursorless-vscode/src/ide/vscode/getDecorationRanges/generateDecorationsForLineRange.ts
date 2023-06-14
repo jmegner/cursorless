@@ -1,7 +1,7 @@
 import { Range } from "@cursorless/common";
 import { BorderStyle, DecoratedRange } from "./getDecorationRanges.types";
 
-export function* handleLineDecorations(
+export function* generateDecorationsForLineRange(
   startLine: number,
   endLine: number,
 ): Iterable<DecoratedRange> {
