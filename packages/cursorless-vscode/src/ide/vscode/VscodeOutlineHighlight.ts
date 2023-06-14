@@ -18,7 +18,7 @@ import {
   window,
 } from "vscode";
 import { VscodeDecorationStyle } from "./VscodeDecorationStyle";
-import { HighlightStyle, VscodeStyle } from "./VscodeHighlights";
+import { HighlightStyle, OutlineStyle } from "./VscodeHighlights";
 import { VscodeTextEditorImpl } from "./VscodeTextEditorImpl";
 import { generateDecorationsForCharacterRange } from "./getDecorationRanges/generateDecorationsForCharacterRange";
 import { generateDecorationsForLineRange } from "./getDecorationRanges/generateDecorationsForLineRange";
@@ -36,7 +36,7 @@ import { getDifferentiatedRanges } from "./getDecorationRanges/getDifferentiated
 export class VscodeOutlineHighlight implements VscodeDecorationStyle {
   private decorator: Decorator;
 
-  constructor(style: VscodeStyle) {
+  constructor(style: OutlineStyle) {
     this.decorator = new Decorator(style);
   }
 
@@ -84,13 +84,20 @@ class Decorator {
     TextEditorDecorationType
   >;
 
-  constructor(styleName: VscodeStyle) {
+  constructor(styleName: OutlineStyle) {
     this.decorationTypes = new CompositeKeyDefaultMap(
       ({ style }) => getDecorationStyle(styleName, style),
       ({
         style: { top, right, bottom, left, isWholeLine },
         differentiationIndex,
-      }) => [top, right, bottom, left, isWholeLine, differentiationIndex],
+      }) => [
+        top,
+        right,
+        bottom,
+        left,
+        isWholeLine ?? false,
+        differentiationIndex,
+      ],
     );
   }
 
@@ -124,13 +131,13 @@ class Decorator {
 }
 
 function getDecorationStyle(
-  style: VscodeStyle,
+  style: OutlineStyle,
   borders: DecorationStyle,
 ): vscode.TextEditorDecorationType {
   const options: DecorationRenderOptions = {
     backgroundColor: new ThemeColor(`cursorless.${style}Background`),
     borderColor: getBorderColor(style, borders),
-    borderStyle: getBorderStyle(style, borders),
+    borderStyle: getBorderStyle(borders),
     borderWidth: "1px",
     borderRadius: getBorderRadius(borders),
     rangeBehavior: DecorationRangeBehavior.ClosedClosed,
@@ -140,32 +147,28 @@ function getDecorationStyle(
   return window.createTextEditorDecorationType(options);
 }
 
-function getBorderStyle(style: VscodeStyle, borders: DecorationStyle): string {
-  return [
-    getSingleBorderStyle(style, borders.top),
-    getSingleBorderStyle(style, borders.right),
-    getSingleBorderStyle(style, borders.bottom),
-    getSingleBorderStyle(style, borders.left),
-  ].join(" ");
+function getBorderStyle(borders: DecorationStyle): string {
+  return [borders.top, borders.right, borders.bottom, borders.left].join(" ");
 }
 
-function getSingleBorderStyle(style: VscodeStyle, borderStyle: BorderStyle) {
-  if (borderStyle !== BorderStyle.solid) {
-    return borderStyle;
+function getBorderColor(style: OutlineStyle, borders: DecorationStyle): string {
+  let solidColor: string;
+  let porousColor: string;
+
+  switch (style) {
+    case HighlightStyle.scopeContent:
+      solidColor = "rgba(238, 0, 255, 0.47)";
+      porousColor = "rgba(235, 222, 236, 0.23)";
+      break;
+    case HighlightStyle.scopeRemoval:
+      solidColor = "rgba(255, 0, 0, 0.47)";
+      porousColor = "rgba(255, 0, 0, 0.29)";
+      break;
+    case HighlightStyle.scopeDomain:
+      solidColor = "#ebdeec84";
+      porousColor = "rgba(235, 222, 236, 0.23)";
+      break;
   }
-
-  return style === HighlightStyle.scopeContent ? "none" : "solid";
-}
-
-function getBorderColor(style: VscodeStyle, borders: DecorationStyle): string {
-  const solidColor =
-    style === HighlightStyle.scopeRemoval
-      ? "rgba(255, 0, 0, 0.47)"
-      : "#ebdeec84";
-  const porousColor =
-    style === HighlightStyle.scopeRemoval
-      ? "rgba(255, 0, 0, 0.29)"
-      : "rgba(235, 222, 236, 0.23)";
 
   return [
     borders.top === BorderStyle.solid ? solidColor : porousColor,

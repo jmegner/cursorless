@@ -19,13 +19,18 @@ export enum HighlightStyle {
 
 export type VscodeStyle = FlashStyle | HighlightStyle;
 
+export type OutlineStyle =
+  | HighlightStyle.scopeContent
+  | HighlightStyle.scopeDomain
+  | HighlightStyle.scopeRemoval;
+
 const backgroundStyles: VscodeStyle[] = [
   HighlightStyle.highlight0,
   HighlightStyle.highlight1,
   HighlightStyle.timingCalibration,
 ].concat(Object.values(HighlightStyle));
 
-const outlineStyles = [
+const outlineStyles: OutlineStyle[] = [
   HighlightStyle.scopeContent,
   HighlightStyle.scopeDomain,
   HighlightStyle.scopeRemoval,
