@@ -16,7 +16,7 @@ import {
   window,
 } from "vscode";
 import { VscodeDecorationStyle } from "./VscodeDecorationStyle";
-import type { VscodeStyle } from "./VscodeHighlights";
+import { HighlightStyle, VscodeStyle } from "./VscodeHighlights";
 import { VscodeTextEditorImpl } from "./VscodeTextEditorImpl";
 import { getDecorationRanges } from "./getDecorationRanges";
 import { toVscodeRange } from "@cursorless/vscode-common";
@@ -131,7 +131,7 @@ function getDecorationStyle(
   const options: DecorationRenderOptions = {
     backgroundColor: new ThemeColor(`cursorless.${style}Background`),
     borderColor: getBorderColor(borders),
-    borderStyle: getBorderStyle(borders),
+    borderStyle: getBorderStyle(style, borders),
     borderWidth: "1px",
     borderRadius: getBorderRadius(borders),
     rangeBehavior: DecorationRangeBehavior.ClosedClosed,
@@ -140,8 +140,21 @@ function getDecorationStyle(
   return window.createTextEditorDecorationType(options);
 }
 
-function getBorderStyle(borders: Borders): string {
-  return [borders.top, borders.right, borders.bottom, borders.left].join(" ");
+function getBorderStyle(style: VscodeStyle, borders: Borders): string {
+  return [
+    getSingleBorderStyle(style, borders.top),
+    getSingleBorderStyle(style, borders.right),
+    getSingleBorderStyle(style, borders.bottom),
+    getSingleBorderStyle(style, borders.left),
+  ].join(" ");
+}
+
+function getSingleBorderStyle(style: VscodeStyle, borderStyle: BorderStyle) {
+  if (borderStyle !== BorderStyle.solid) {
+    return borderStyle;
+  }
+
+  return style === HighlightStyle.scopeContent ? "none" : "solid";
 }
 
 function getBorderColor(borders: Borders): string {
