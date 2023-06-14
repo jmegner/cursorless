@@ -87,13 +87,10 @@ class Decorator {
   constructor(styleName: VscodeStyle) {
     this.decorationTypes = new CompositeKeyDefaultMap(
       ({ style }) => getDecorationStyle(styleName, style),
-      ({ style: { top, right, bottom, left }, differentiationIndex }) => [
-        top,
-        right,
-        bottom,
-        left,
+      ({
+        style: { top, right, bottom, left, isWholeLine },
         differentiationIndex,
-      ],
+      }) => [top, right, bottom, left, isWholeLine, differentiationIndex],
     );
   }
 
