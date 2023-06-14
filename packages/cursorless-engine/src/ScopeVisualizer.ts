@@ -65,6 +65,7 @@ export class ScopeVisualizer implements Disposable {
     });
 
     ide().visibleTextEditors.forEach((editor) => {
+      ide().setHighlightRanges("scopeDomain", editor, []);
       ide().setHighlightRanges("scopeContent", editor, []);
     });
   }

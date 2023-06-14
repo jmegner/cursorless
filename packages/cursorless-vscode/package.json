@@ -256,9 +256,9 @@
         "id": "cursorless.scopeDomainBackground",
         "description": "Background color to use for visualizing scope domains",
         "defaults": {
-          "dark": "#54545415",
-          "light": "#54545415",
-          "highContrast": "#54545415"
+          "dark": "#00e1ff18",
+          "light": "#00e1ff18",
+          "highContrast": "#00e1ff18"
         }
       },
       {
