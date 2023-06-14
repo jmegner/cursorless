@@ -43,6 +43,11 @@ export class ScopeVisualizer implements Disposable {
       const targets = scopes.flatMap((scope) => scope.getTargets(false));
 
       ide().setHighlightRanges(
+        "scopeDomain",
+        editor,
+        scopes.map(({ domain }) => toCharacterRange(domain)),
+      );
+      ide().setHighlightRanges(
         "scopeContent",
         editor,
         targets.map((target) => toCharacterRange(target.contentRange)),

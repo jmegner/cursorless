@@ -245,7 +245,7 @@
       },
       {
         "id": "cursorless.scopeContentBackground",
-        "description": "Background color to use for visualizing scopes",
+        "description": "Background color to use for visualizing scope content ranges",
         "defaults": {
           "dark": "#ea00ff57",
           "light": "#ea00ff57",
@@ -253,8 +253,17 @@
         }
       },
       {
+        "id": "cursorless.scopeDomainBackground",
+        "description": "Background color to use for visualizing scope domains",
+        "defaults": {
+          "dark": "#54545415",
+          "light": "#54545415",
+          "highContrast": "#54545415"
+        }
+      },
+      {
         "id": "cursorless.scopeContentBorder",
-        "description": "Border color to use for visualizing scopes",
+        "description": "Border color to use for visualizing scope content ranges",
         "defaults": {
           "dark": "#ebdeec84",
           "light": "#ebdeec84",
