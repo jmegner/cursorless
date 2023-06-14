@@ -4,7 +4,6 @@ import {
   Borders,
   DecoratedRange,
 } from "./getDecorationRanges.types";
-import { singleLineRange } from "./singleLineRange";
 import { flatmap } from "itertools";
 
 export function* handleMultipleLines(
@@ -22,6 +21,7 @@ export function* generateLineGroupings(
     const nextLine = i === lineRanges.length - 1 ? null : lineRanges[i + 1];
     yield {
       lineNumber: currentLine.start.line,
+
       previousLine:
         previousLine == null
           ? null
@@ -31,12 +31,14 @@ export function* generateLineGroupings(
               isFirst: i === 1,
               isLast: false,
             },
+
       currentLine: {
         start: currentLine.start.character,
         end: currentLine.end.character,
         isFirst: i === 0,
         isLast: i === lineRanges.length - 1,
       },
+
       nextLine:
         nextLine == null
           ? null
@@ -108,8 +110,8 @@ function* handleLine({
       previousLine == null || previousLine.isFirst
         ? BorderStyle.solid
         : BorderStyle.none,
-    bottom: nextLine == null ? BorderStyle.solid : BorderStyle.none,
-    left: previousLine == null ? BorderStyle.solid : BorderStyle.porous,
+    bottom: currentLine.isLast ? BorderStyle.solid : BorderStyle.none,
+    left: currentLine.isFirst ? BorderStyle.solid : BorderStyle.porous,
     right: BorderStyle.none,
   };
 
@@ -118,12 +120,12 @@ function* handleLine({
   for (const { offset, lineType, isStart } of events) {
     if (offset > currentOffset) {
       yield {
-        range: singleLineRange(lineNumber, currentOffset, offset),
+        range: new Range(lineNumber, currentOffset, lineNumber, offset),
         style: {
           ...currentDecoration,
           right:
             offset === currentLine.end
-              ? nextLine == null
+              ? currentLine.isLast
                 ? BorderStyle.solid
                 : BorderStyle.porous
               : BorderStyle.none,
