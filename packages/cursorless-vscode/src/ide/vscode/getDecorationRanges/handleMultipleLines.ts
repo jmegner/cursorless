@@ -103,7 +103,13 @@ function* handleLine({
         ]),
   ];
 
-  events.sort((a, b) => a.offset - b.offset);
+  events.sort((a, b) => {
+    if (a.offset === b.offset) {
+      return a.lineType === LineType.current ? 1 : -1;
+    }
+
+    return a.offset - b.offset;
+  });
 
   const currentDecoration: Borders = {
     top:
@@ -116,8 +122,13 @@ function* handleLine({
   };
 
   let currentOffset = currentLine.start;
+  let yieldedAnything = false;
+  let isDone = false;
 
   for (const { offset, lineType, isStart } of events) {
+    if (isDone) {
+      break;
+    }
     if (offset > currentOffset) {
       yield {
         range: new Range(lineNumber, currentOffset, lineNumber, offset),
@@ -131,11 +142,8 @@ function* handleLine({
               : BorderStyle.none,
         },
       };
+      yieldedAnything = true;
       currentDecoration.left = BorderStyle.none;
-
-      if (offset === currentLine.end) {
-        return;
-      }
     }
 
     switch (lineType) {
@@ -147,6 +155,9 @@ function* handleLine({
         }
         break;
       case LineType.current:
+        if (!isStart) {
+          isDone = true;
+        }
         break;
       case LineType.next:
         if (isStart) {
@@ -160,6 +171,21 @@ function* handleLine({
     }
 
     currentOffset = offset;
+  }
+
+  if (!yieldedAnything) {
+    yield {
+      range: new Range(
+        lineNumber,
+        currentLine.start,
+        lineNumber,
+        currentLine.end,
+      ),
+      style: {
+        ...currentDecoration,
+        right: currentLine.isLast ? BorderStyle.solid : BorderStyle.porous,
+      },
+    };
   }
 }
 

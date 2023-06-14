@@ -14,6 +14,7 @@ export enum HighlightStyle {
   timingCalibration = "timingCalibration",
   scopeContent = "scopeContent",
   scopeDomain = "scopeDomain",
+  scopeRemoval = "scopeRemoval",
 }
 
 export type VscodeStyle = FlashStyle | HighlightStyle;
@@ -24,7 +25,11 @@ const backgroundStyles: VscodeStyle[] = [
   HighlightStyle.timingCalibration,
 ].concat(Object.values(HighlightStyle));
 
-const outlineStyles = [HighlightStyle.scopeContent, HighlightStyle.scopeDomain];
+const outlineStyles = [
+  HighlightStyle.scopeContent,
+  HighlightStyle.scopeDomain,
+  HighlightStyle.scopeRemoval,
+];
 
 /**
  * Manages highlights for VSCode.  This class is also used by

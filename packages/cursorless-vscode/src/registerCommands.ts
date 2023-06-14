@@ -22,7 +22,7 @@ export function registerCommands(
   vscodeIde: VscodeIDE,
   commandApi: CommandApi,
   testCaseRecorder: TestCaseRecorder,
-  scopeVisualizer: StartStop<[ScopeType]>,
+  scopeVisualizer: StartStop<[ScopeType, string]>,
   keyboardCommands: KeyboardCommands,
   hats: VscodeHats,
 ): void {

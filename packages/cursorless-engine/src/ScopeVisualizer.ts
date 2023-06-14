@@ -2,6 +2,7 @@ import { Disposable, ScopeType, toCharacterRange } from "@cursorless/common";
 import { Debouncer } from "./core/Debouncer";
 import { ScopeHandlerFactory } from "./processTargets/modifiers/scopeHandlers/ScopeHandlerFactory";
 import { ide } from "./singletons/ide.singleton";
+import { VisualizationType } from "./VisualizationType";
 
 export class ScopeVisualizer implements Disposable {
   private disposables: Disposable[] = [];
@@ -10,6 +11,7 @@ export class ScopeVisualizer implements Disposable {
   constructor(
     private scopeHandlerFactory: ScopeHandlerFactory,
     private scopeType: ScopeType,
+    private visualizationType: VisualizationType,
   ) {
     this.disposables.push(
       // An event that fires when a text document opens
@@ -42,16 +44,27 @@ export class ScopeVisualizer implements Disposable {
 
       const targets = scopes.flatMap((scope) => scope.getTargets(false));
 
-      ide().setHighlightRanges(
-        "scopeDomain",
-        editor,
-        scopes.map(({ domain }) => toCharacterRange(domain)),
-      );
-      ide().setHighlightRanges(
-        "scopeContent",
-        editor,
-        targets.map((target) => toCharacterRange(target.contentRange)),
-      );
+      switch (this.visualizationType) {
+        case VisualizationType.standard:
+          ide().setHighlightRanges(
+            "scopeDomain",
+            editor,
+            scopes.map(({ domain }) => toCharacterRange(domain)),
+          );
+          ide().setHighlightRanges(
+            "scopeContent",
+            editor,
+            targets.map((target) => toCharacterRange(target.contentRange)),
+          );
+          break;
+        case VisualizationType.removal:
+          ide().setHighlightRanges(
+            "scopeRemoval",
+            editor,
+            targets.map((target) => toCharacterRange(target.getRemovalRange())),
+          );
+          break;
+      }
     });
   }
 
@@ -67,6 +80,7 @@ export class ScopeVisualizer implements Disposable {
     ide().visibleTextEditors.forEach((editor) => {
       ide().setHighlightRanges("scopeDomain", editor, []);
       ide().setHighlightRanges("scopeContent", editor, []);
+      ide().setHighlightRanges("scopeRemoval", editor, []);
     });
   }
 }

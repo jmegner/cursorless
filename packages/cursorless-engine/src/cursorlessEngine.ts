@@ -17,6 +17,7 @@ import { ScopeHandlerFactoryImpl } from "./processTargets/modifiers/scopeHandler
 import { runCommand } from "./runCommand";
 import { injectIde } from "./singletons/ide.singleton";
 import { StartStop } from "./StartStop";
+import { VisualizationType } from "./VisualizationType";
 
 export function createCursorlessEngine(
   treeSitter: TreeSitter,
@@ -49,10 +50,11 @@ export function createCursorlessEngine(
   const languageDefinitions = new LanguageDefinitions(treeSitter);
 
   const scopeVisualizer = new StartStop(
-    (scopeType: ScopeType) =>
+    (scopeType: ScopeType, visualizationType: string) =>
       new ScopeVisualizer(
         new ScopeHandlerFactoryImpl(languageDefinitions),
         scopeType,
+        VisualizationType[visualizationType as keyof typeof VisualizationType],
       ),
   );
 
@@ -109,7 +111,7 @@ export interface CommandApi {
 
 export interface CursorlessEngine {
   commandApi: CommandApi;
-  scopeVisualizer: StartStop<[ScopeType]>;
+  scopeVisualizer: StartStop<[ScopeType, string]>;
   testCaseRecorder: TestCaseRecorder;
   storedTargets: StoredTargetMap;
   hatTokenMap: HatTokenMapImpl;

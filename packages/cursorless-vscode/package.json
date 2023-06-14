@@ -262,6 +262,15 @@
         }
       },
       {
+        "id": "cursorless.scopeRemovalBackground",
+        "description": "Background color to use for visualizing scope removals",
+        "defaults": {
+          "dark": "#ff000018",
+          "light": "#ff000018",
+          "highContrast": "#ff000018"
+        }
+      },
+      {
         "id": "cursorless.scopeContentBorder",
         "description": "Border color to use for visualizing scope content ranges",
         "defaults": {
