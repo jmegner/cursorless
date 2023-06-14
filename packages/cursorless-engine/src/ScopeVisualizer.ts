@@ -15,19 +15,8 @@ interface VisualizationInfo {
 }
 
 export class ScopeVisualizer implements Disposable {
-  setScopeType(
-    scopeType: ScopeType | undefined,
-    visualizationType: string | undefined,
-  ) {
-    if (scopeType === undefined || visualizationType === undefined) {
-      this.visualizationInfo = undefined;
-    } else {
-      this.visualizationInfo = {
-        scopeType,
-        visualizationType: visualizationType as VisualizationType,
-      };
-    }
-
+  setScopeType(visualizationInfo: VisualizationInfo | undefined) {
+    this.visualizationInfo = visualizationInfo;
     this.debouncer.run();
   }
 

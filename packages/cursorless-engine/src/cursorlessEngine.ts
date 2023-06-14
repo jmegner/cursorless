@@ -16,6 +16,7 @@ import { LanguageDefinitions } from "./languages/LanguageDefinitions";
 import { ScopeHandlerFactoryImpl } from "./processTargets/modifiers/scopeHandlers";
 import { runCommand } from "./runCommand";
 import { injectIde } from "./singletons/ide.singleton";
+import { VisualizationType } from "./VisualizationType";
 
 export function createCursorlessEngine(
   treeSitter: TreeSitter,
@@ -81,10 +82,13 @@ export function createCursorlessEngine(
     },
     scopeVisualizer: {
       start(scopeType: ScopeType, visualizationType: string) {
-        scopeVisualizer.setScopeType(scopeType, visualizationType);
+        scopeVisualizer.setScopeType({
+          scopeType,
+          visualizationType: visualizationType as VisualizationType,
+        });
       },
       stop() {
-        scopeVisualizer.setScopeType(undefined, undefined);
+        scopeVisualizer.setScopeType(undefined);
       },
     },
     testCaseRecorder,
