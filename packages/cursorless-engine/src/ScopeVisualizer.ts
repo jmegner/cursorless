@@ -55,7 +55,6 @@ export class ScopeVisualizer implements Disposable {
 
   private highlightScopes() {
     if (this.visualizationInfo == null) {
-      this.clearHighlights();
       return;
     }
 
@@ -89,7 +88,6 @@ export class ScopeVisualizer implements Disposable {
             editor,
             targets.map((target) => toCharacterRange(target.contentRange)),
           );
-          ide().setHighlightRanges("scopeRemoval", editor, []);
           break;
         case VisualizationType.removal:
           ide().setHighlightRanges(
@@ -101,7 +99,6 @@ export class ScopeVisualizer implements Disposable {
                 : toCharacterRange(target.getRemovalHighlightRange()),
             ),
           );
-          ide().setHighlightRanges("scopeContent", editor, []);
           break;
       }
     });

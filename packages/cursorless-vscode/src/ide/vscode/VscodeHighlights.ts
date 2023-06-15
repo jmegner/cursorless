@@ -24,11 +24,13 @@ export type OutlineStyle =
   | HighlightStyle.scopeDomain
   | HighlightStyle.scopeRemoval;
 
-const backgroundStyles: VscodeStyle[] = [
-  HighlightStyle.highlight0,
-  HighlightStyle.highlight1,
-  HighlightStyle.timingCalibration,
-].concat(Object.values(HighlightStyle));
+const backgroundStyles: VscodeStyle[] = (
+  [
+    HighlightStyle.highlight0,
+    HighlightStyle.highlight1,
+    HighlightStyle.timingCalibration,
+  ] as VSCodeStyle[]
+).concat(Object.values(FlashStyle));
 
 const outlineStyles: OutlineStyle[] = [
   HighlightStyle.scopeContent,

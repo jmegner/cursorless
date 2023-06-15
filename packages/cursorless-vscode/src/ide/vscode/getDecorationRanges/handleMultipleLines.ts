@@ -105,7 +105,10 @@ function* handleLine({
 
   events.sort((a, b) => {
     if (a.offset === b.offset) {
-      return a.lineType === LineType.current ? 1 : -1;
+      if (a.lineType === LineType.current) {
+        return 1;
+      }
+      return a.isStart ? -1 : 1;
     }
 
     return a.offset - b.offset;
@@ -170,7 +173,9 @@ function* handleLine({
         break;
     }
 
-    currentOffset = offset;
+    if (currentOffset < offset) {
+      currentOffset = offset;
+    }
   }
 
   if (!yieldedAnything) {
