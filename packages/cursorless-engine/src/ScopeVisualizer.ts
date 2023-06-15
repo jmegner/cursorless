@@ -15,13 +15,13 @@ interface VisualizationInfo {
 }
 
 export class ScopeVisualizer implements Disposable {
-  setScopeType(visualizationInfo: VisualizationInfo | undefined) {
+  async setScopeType(visualizationInfo: VisualizationInfo | undefined) {
     this.visualizationInfo = visualizationInfo;
     // Clear highlights becasue VSCode seems to behave strangely when
     // changing the highlight type while highlights are active.  Would probably
     // be better to have this happen in VSCode-specific impl, but that's tricky
     // because the VSCode impl doesn't know about the visualization type.
-    this.clearHighlights();
+    await this.clearHighlights();
     this.debouncer.run();
   }
 
@@ -45,20 +45,20 @@ export class ScopeVisualizer implements Disposable {
     this.debouncer.run();
   }
 
-  private clearHighlights() {
-    ide().visibleTextEditors.forEach((editor) => {
-      ide().setHighlightRanges("scopeDomain", editor, []);
-      ide().setHighlightRanges("scopeContent", editor, []);
-      ide().setHighlightRanges("scopeRemoval", editor, []);
-    });
+  private async clearHighlights() {
+    for (const editor of ide().visibleTextEditors) {
+      await ide().setHighlightRanges("scopeDomain", editor, []);
+      await ide().setHighlightRanges("scopeContent", editor, []);
+      await ide().setHighlightRanges("scopeRemoval", editor, []);
+    }
   }
 
-  private highlightScopes() {
+  private async highlightScopes() {
     if (this.visualizationInfo == null) {
       return;
     }
 
-    ide().visibleTextEditors.forEach((editor) => {
+    for (const editor of ide().visibleTextEditors) {
       const { document } = editor;
 
       const { scopeType, visualizationType } = this.visualizationInfo!;
@@ -75,7 +75,7 @@ export class ScopeVisualizer implements Disposable {
 
       const targets = scopes.flatMap((scope) => scope.getTargets(false));
 
-      ide().setHighlightRanges(
+      await ide().setHighlightRanges(
         "scopeDomain",
         editor,
         scopes.map(({ domain }) => toCharacterRange(domain)),
@@ -83,14 +83,14 @@ export class ScopeVisualizer implements Disposable {
 
       switch (visualizationType) {
         case VisualizationType.content:
-          ide().setHighlightRanges(
+          await ide().setHighlightRanges(
             "scopeContent",
             editor,
             targets.map((target) => toCharacterRange(target.contentRange)),
           );
           break;
         case VisualizationType.removal:
-          ide().setHighlightRanges(
+          await ide().setHighlightRanges(
             "scopeRemoval",
             editor,
             targets.map((target) =>
@@ -101,7 +101,7 @@ export class ScopeVisualizer implements Disposable {
           );
           break;
       }
-    });
+    }
   }
 
   dispose(): void {
