@@ -29,7 +29,7 @@ const backgroundStyles: VscodeStyle[] = (
     HighlightStyle.highlight0,
     HighlightStyle.highlight1,
     HighlightStyle.timingCalibration,
-  ] as VSCodeStyle[]
+  ] as VscodeStyle[]
 ).concat(Object.values(FlashStyle));
 
 const outlineStyles: OutlineStyle[] = [
